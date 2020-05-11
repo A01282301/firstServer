@@ -1,8 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const morgan = require('morgan');
 
 const app = express();
 const jsonParser = bodyParser.json()
+
+
+app.use( morgan('dev')); //To define im on development, it will not be used on production
+
 //Data of students
 let listOfStudents = [
     {
@@ -102,6 +107,29 @@ app.post('/api/create', jsonParser , (req, res) =>{
     return res.status(200).json({});
 
 } )
+
+app.delete( '/api/remove' ,(req, res) =>{
+    let id = req.query.id;
+
+    if(!id){
+        res.statusMessage = "ID to remove was not received";
+        return res.status(406).end();
+    }
+  
+    let remove = listOfStudents.find( (student) => {
+        if(student.id === id){
+           return true;
+        }
+    })
+
+    if(remove<0){
+        res.statusMessage = "Student not found";
+        return res.status(400).end();
+    }
+    listOfStudents.splice(remove, 1);
+    return res.status(204).end()
+})
+
 //Port configuration
 app.listen( 8080, ()=>{
     console.log("This app is running on the http port")
