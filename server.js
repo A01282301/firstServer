@@ -4,9 +4,31 @@ const morgan = require('morgan');
 
 const app = express();
 const jsonParser = bodyParser.json()
-
+const APIKEY = "password"
 
 app.use( morgan('dev')); //To define im on development, it will not be used on production
+
+
+function validateAPI( req, res, next){
+    console.log(req.headers);
+    if(req.headers.apikey == APIKEY){ //APIKEY BY HEADERS
+        next();
+    }
+    else //APIKEY BY AUTH Bearer
+    if(!req.headers.authorization){ 
+        res.statusMessage = "No APIKEY was provided";
+        return res.status(401).end();
+    }
+    if(req.headers.authorization === `Bearer ${APIKEY}` ){
+        next();
+    }else{
+        res.statusMessage = "Wrong APIKEY";
+        return res.status(401).end();
+    }
+
+}
+
+app.use(validateAPI);
 
 //Data of students
 let listOfStudents = [
@@ -36,6 +58,10 @@ app.get('/api/students', (req, res) =>{
     return res.status(200).json(listOfStudents);
 } )
 
+
+
+
+
 //Get a student only one id send as a query
 app.get('/api/studentID', (req, res) =>{
     console.log('getting student by id')
@@ -56,6 +82,8 @@ app.get('/api/studentID', (req, res) =>{
 
     return res.status(200).json(result);
 } )
+
+
 
 //Send as a link KEEP IN MIND THAT YOU ONLY CHANGED ONE LINE
 app.get('/api/studentID/:id', (req, res) =>{
@@ -105,9 +133,9 @@ app.post('/api/create', jsonParser , (req, res) =>{
         return res.status(200).json({});
     }
     return res.status(200).json({});
-
 } )
 
+//Deletes a student by query
 app.delete( '/api/remove' ,(req, res) =>{
     let id = req.query.id;
 
