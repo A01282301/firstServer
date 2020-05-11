@@ -1,6 +1,8 @@
 const express = require('express');
-const app = express();
+const bodyParser = require('body-parser');
 
+const app = express();
+const jsonParser = bodyParser.json()
 //Data of students
 let listOfStudents = [
     {
@@ -32,7 +34,7 @@ app.get('/api/students', (req, res) =>{
 //Get a student only one id send as a query
 app.get('/api/studentID', (req, res) =>{
     console.log('getting student by id')
-    let id = req.query.id;
+    let id = req.query.id; //Query
     if(!id){
         res.statusMessage ='No id was provided';
        return res.status(406).end();
@@ -53,7 +55,7 @@ app.get('/api/studentID', (req, res) =>{
 //Send as a link KEEP IN MIND THAT YOU ONLY CHANGED ONE LINE
 app.get('/api/studentID/:id', (req, res) =>{
     console.log('getting student by id')
-    let id = req.params.id;
+    let id = req.params.id; //Parameter
     if(!id){
         res.statusMessage ='No id was provided';
        return res.status(406).end();
@@ -71,6 +73,35 @@ app.get('/api/studentID/:id', (req, res) =>{
     return res.status(200).json(result);
 } )
 
+
+//body post
+app.post('/api/create', jsonParser , (req, res) =>{
+    console.log(req.body)
+    let name = req.body.name;
+    let id = req.body.id;
+
+    if(!name || !id){
+        res.statusMessage = "A parameter was not included";
+        return res.status(406).end();
+    }
+    let flag = false;
+    listOfStudents.forEach(element => {
+        if(element.id === id){
+            flag = true;
+        }
+    });
+    let newStudent =  {name, id}; 
+    if(flag){
+      
+        res.statusMessage = "The ID value already exists";
+        return res.status(406).end();
+    }else{
+        listOfStudents.push(newStudent)
+        return res.status(200).json({});
+    }
+    return res.status(200).json({});
+
+} )
 //Port configuration
 app.listen( 8080, ()=>{
     console.log("This app is running on the http port")
